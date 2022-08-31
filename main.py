@@ -45,8 +45,8 @@ def draw_block(color: tuple, row: int, column: int) -> None:
 
 snake_blocks=[SnakeBlock(9,9)]
 apple = get_random_empty_block()
-d_row = 0
-d_col = 1
+d_row = buf_row = 0
+d_col = buf_col = 1
 total = 0
 speed = 1
 screen = pygame.display.set_mode(size)
@@ -61,17 +61,17 @@ while True:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP and d_col:
-                d_row = -1
-                d_col = 0
+                buf_row = -1
+                buf_col = 0
             elif event.key == pygame.K_DOWN and d_col:
-                d_row = 1
-                d_col = 0
+                buf_row = 1
+                buf_col = 0
             elif event.key == pygame.K_LEFT and d_row:
-                d_row = 0
-                d_col = -1
+                buf_row = 0
+                buf_col = -1
             elif event.key == pygame.K_RIGHT and d_row:
-                d_row = 0
-                d_col = 1
+                buf_row = 0
+                buf_col = 1
     
     screen.fill(FRAME_COLOR)
     pygame.draw.rect(screen, HEADER_COLOR, [0, 0, size[0], HEADER_MARGIN])
@@ -100,16 +100,24 @@ while True:
     for block in snake_blocks:
         draw_block(SNAKE_COLOR, block.x, block.y)
 
+    pygame.display.flip()#что бы изменения применились
     if apple == head:
         total += 1
         speed = total//5 + 1
         snake_blocks.append(apple)
         apple = get_random_empty_block()
-    
+
+    d_row = buf_row
+    d_col = buf_col
     head = snake_blocks[-1]
     new_head = SnakeBlock(head.x + d_row, head.y + d_col)
+
+    if new_head in snake_blocks:
+        print('crash')
+        pygame.quit()
+        sys.exit()
+
     snake_blocks.append(new_head)
     snake_blocks.pop(0)
     
-    pygame.display.flip()#что бы изменения применились
     timer.tick(3+speed)#кол. отрисовки кадров
